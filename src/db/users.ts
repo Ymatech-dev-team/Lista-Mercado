@@ -26,6 +26,13 @@ export async function createUser(input: { email: string; passwordHash: string; p
   return row;
 }
 
+export async function updateUserPassword(userId: string, passwordHash: string) {
+  await db
+    .update(users)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
 export async function markEmailVerified(userId: string) {
   await db
     .update(users)

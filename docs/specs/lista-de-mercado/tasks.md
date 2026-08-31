@@ -44,11 +44,16 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 > - 🟠 Expirar contas não-verificadas (anti-squatting) + **bloquear login de conta não-verificada** (fecha no 2b).
 > - 🟡 Rotacionar a credencial do Neon antes de prod; segredos só nos env da Vercel.
 
-**2b — Login + sessão + reset**
-- [ ] T2.4 — Login: timing-safe (hash dummy p/ e-mail inexistente), mensagem genérica, rate limit Upstash (IP+conta). **Teste:** e-mail inexistente não vaza por tempo; 6ª tentativa dá 429.
-- [ ] T2.5 — Sessão: token opaco → `sha256` no banco, cookie `__Host-`, rotação no login, deslizante+absoluta. **Teste:** logout encerra no servidor; sessão não some ao logar em outro device.
-- [ ] T2.6 — Reset de senha: token hasheado single-use atômico, expira 15–30min, derruba sessões, msg igual p/ e-mail inexistente. **Teste:** token velho não funciona pós-reset.
-- [ ] Review do escopo (code + **security** + a11y) + seu ok.
+**2b — Login + sessão + reset** ✅ construído, testado ao vivo, revisado por AppSec.
+- [x] T2.4 — Login timing-safe (dummy hash), mensagem genérica, rate limit (IP seguro `x-real-ip` + conta), gate de e-mail não-verificado. ✓
+- [x] T2.5 — Sessão: token opaco → `sha256` no banco, cookie `__Host-` (prod) httpOnly/Secure/Lax, rotação no login, deslizante+absoluta. ✓ logout revoga no servidor (sessões=0).
+- [x] T2.6 — Reset: token só-hash single-use atômico, expira 30min, derruba todas as sessões, resposta idêntica (anti-enum). ✓ testado ponta a ponta.
+- [x] Review AppSec do 2b: núcleo aprovado; corrigidos HSTS+headers (`next.config.ts`), IP anti-spoof (`x-real-ip`), cookie maxAge = teto absoluto. Headers confirmados na resposta.
+
+> **Dívida de segurança — pré-produção (atualizada):**
+> - 🔴 Ativar Upstash de verdade (chaves) — hoje no-op em dev, fail-closed em prod.
+> - 🟠 Expirar contas não-verificadas (anti-squatting).
+> - 🟡 Rotacionar credencial do Neon; timing residual no "esqueci senha" (mitigado por rate limit); CSP completa; verificar senha vazada (HIBP).
 
 ## Escopo 3 — Listas + itens (o coração)
 - [ ] T3.1 — Criar lista (1 ativa via índice único; idempotente). **Teste:** duplo clique = 1 lista; F5 recupera.

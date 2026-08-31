@@ -30,6 +30,17 @@ export function sendVerificationEmail(to: string, link: string) {
   );
 }
 
+export function sendPasswordResetEmail(to: string, link: string) {
+  return send(
+    to,
+    "Redefinir sua senha — Meu Mercado",
+    `<p>Recebemos um pedido para redefinir a senha da sua conta no Meu Mercado.</p>
+     <p>Clique no link abaixo para criar uma nova senha (o link expira em 30 minutos):</p>
+     <p><a href="${link}">Redefinir minha senha</a></p>
+     <p>Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.</p>`
+  );
+}
+
 // Enviado quando alguém tenta cadastrar um e-mail que JÁ tem conta.
 // Evita revelar na tela que a conta existe (anti-enumeração, design.md §4).
 export function sendAccountExistsEmail(to: string, loginUrl: string) {

@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { getClientIp } from "@/lib/request-ip";
 import { signupSchema } from "@/lib/validation/auth";
 import { hashPassword } from "@/lib/auth/password";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
@@ -16,11 +16,6 @@ export type SignupState = {
   error?: string;
   fieldErrors?: { email?: string; password?: string; consent?: string };
 };
-
-async function clientIp(): Promise<string> {
-  const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
-}
 
 export async function signupAction(_prev: SignupState, formData: FormData): Promise<SignupState> {
   const parsed = signupSchema.safeParse({
@@ -41,7 +36,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
   const { email, password } = parsed.data;
 
   // Rate limit ANTES do hash e do envio (anti-spam/DoS + anti-enumeração em massa).
-  if (!(await checkSignupRateLimit(await clientIp(), email))) {
+  if (!(await checkSignupRateLimit(await getClientIp(), email))) {
     return { error: "Muitas tentativas. Tente novamente em alguns minutos." };
   }
 
