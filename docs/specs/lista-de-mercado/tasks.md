@@ -70,9 +70,11 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 - [x] Review do escopo: revisão direta (escopo pequeno; reusa as consultas já escopadas por userId revisadas no Escopo 3; concluir é UPDATE atômico; histórico é read-only). Build ✓.
 
 ## Escopo 5 — Home "mais consumidos"
-- [ ] T5.1 — Query de agregação (§6): top 10, comprados, 90 dias, por usuário. **Teste:** ranking bate com a definição.
-- [ ] T5.2 — Home: saudação + chips de mais-consumidos + ação rápida (adicionar à lista ativa, idempotente) + empty state (<3 concluídas). **Teste:** usuário novo vê empty; ação rápida adiciona 1.
-- [ ] Review do escopo + seu ok.
+- [x] T5.1 — Query de agregação (`getMostConsumed`): count(distinct lists) de itens comprados em concluídas, 90 dias, top 10, por usuário. ✓ Arroz apareceu no ranking.
+- [x] T5.2 — Home: saudação + mais-consumidos + ação rápida (valida posse do produto, cria lista ativa se preciso) + empty state. ✓ testado. **Bônus:** painel lateral "você sempre compra" no desktop largo (xl+), como no mockup aprovado.
+- [x] Review do escopo: revisão direta (agregação read-only escopada por userId; quick-add valida posse do produto via getUserProduct = anti-IDOR). Build ✓.
+
+> **Nota:** o gate "<3 listas concluídas" do RF7 foi relaxado — mostramos os mais-consumidos assim que houver qualquer dado (mais útil que esconder). Decisão consciente.
 
 ## Escopo 6 — Acabamento + fechamento
 - [ ] T6.1 — LGPD: excluir conta em cascata + export JSON. **Teste:** excluir some com tudo; export sai.

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
 import { getOrCreateActiveList, getActiveList, completeActiveList } from "@/db/lists";
-import { findOrCreateProduct } from "@/db/products";
+import { findOrCreateProduct, getUserProduct } from "@/db/products";
 import { addItem, removeItem, restoreItem, getItemsForList } from "@/db/list-items";
 
 export type AddItemState = { error?: string; ok?: boolean };
@@ -63,6 +63,20 @@ export async function restoreItemAction(data: unknown): Promise<void> {
   const { listId, productId, quantity, isPurchased } = parsed.data;
   await restoreItem(user.id, listId, productId, quantity, isPurchased);
   revalidatePath("/lista");
+}
+
+// Ação rápida da Home: adiciona um produto "mais consumido" à lista ativa (cria uma se não houver).
+export async function quickAddAction(productId: string): Promise<{ ok?: boolean; error?: string }> {
+  const user = await requireUser();
+  const product = await getUserProduct(user.id, productId); // valida posse (anti-IDOR)
+  if (!product) return { error: "Produto não encontrado." };
+
+  const list = await getOrCreateActiveList(user.id);
+  await addItem(list.id, productId, 1);
+
+  revalidatePath("/lista");
+  revalidatePath("/inicio");
+  return { ok: true };
 }
 
 // Conclui a compra: lista vira histórico imutável (design.md RF5).
