@@ -77,10 +77,16 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 > **Nota:** o gate "<3 listas concluídas" do RF7 foi relaxado — mostramos os mais-consumidos assim que houver qualquer dado (mais útil que esconder). Decisão consciente.
 
 ## Escopo 6 — Acabamento + fechamento
-- [ ] T6.1 — LGPD: excluir conta em cascata + export JSON. **Teste:** excluir some com tudo; export sai.
-- [ ] T6.2 — Segurança de borda: HSTS, checagem final de segredos, nenhum `console.log` de senha. **Teste:** security-review final passa.
-- [ ] T6.3 — `/analyze` de consistência: todo RF/RNF tem cobertura. **Teste:** nenhum requisito órfão.
-- [ ] Review final (3 lentes) + seu ok + deploy prod.
+- [x] T6.1 — LGPD: excluir conta (action + confirmação "EXCLUIR"; DELETE em users dispara cascata) + export JSON (`/api/export`, escopado por sessão). ✓ export testado (200, e-mail + 2 listas).
+- [x] T6.2 — Segurança de borda: HSTS + headers (feito no 2b); nenhum segredo `NEXT_PUBLIC_`; nenhum log de senha. ✓ + fixes do /analyze: logout limpa `localStorage` do dispositivo; quick-add trava duplo-clique.
+- [x] T6.3 — `/analyze` de consistência: quase tudo coberto. Deferidos conscientes: RF2 excluir-lista (→ Fase 2), RF7 limiar "<3 listas" (mostramos com qualquer dado — decisão consciente), feedback "quantidade atualizada" e rascunho de texto (menores → Fase 2).
+- [x] **Bônus (pedido do JP):** login com layout split no desktop (painel da marca) + limpo no mobile. ✓
+- [ ] 🔴 **Deploy + produção** (só o JP faz):
+  1. Criar **Resend** (chave `RESEND_API_KEY`) + verificar domínio; criar **Upstash** (`UPSTASH_REDIS_REST_URL/TOKEN`).
+  2. Na Vercel: importar o repo, setar env (`DATABASE_URL` pooled, `DATABASE_URL_UNPOOLED`, `APP_URL` = URL da Vercel, `RESEND_API_KEY`, `UPSTASH_*`). **Nenhum com `NEXT_PUBLIC_`.**
+  3. Rodar o SQL do design.md §6 no Neon de **produção** (se usar branch/projeto separado de prod).
+  4. Rotacionar a senha do Neon antes de público.
+  5. Revisar o texto jurídico da política de privacidade.
 
 ---
 

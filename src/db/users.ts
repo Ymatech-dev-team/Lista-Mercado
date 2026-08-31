@@ -39,3 +39,9 @@ export async function markEmailVerified(userId: string) {
     .set({ emailVerifiedAt: new Date(), updatedAt: new Date() })
     .where(eq(users.id, userId));
 }
+
+// LGPD — exclusão de conta. As FKs são ON DELETE CASCADE a partir de users, então apagar
+// a linha do usuário apaga em cascata: sessions, tokens, products, lists, list_items.
+export async function deleteUserAccount(userId: string) {
+  await db.delete(users).where(eq(users.id, userId));
+}

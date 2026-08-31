@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { logoutAction } from "@/app/auth-actions";
+import { LogoutButton } from "@/components/logout-button";
 import { HomeIcon, ListIcon, ClockIcon, UserIcon, ChevronLeft, ChevronRight } from "@/components/icons";
 
 const NAV = [
@@ -122,9 +122,7 @@ export function AppShell({ userEmail, children }: { userEmail: string; children:
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13px] font-medium text-ink">{userEmail}</p>
-                <form action={logoutAction}>
-                  <button type="submit" className="text-xs text-muted transition-colors hover:text-ink">Sair</button>
-                </form>
+                <LogoutButton className="text-xs text-muted transition-colors hover:text-ink">Sair</LogoutButton>
               </div>
             </div>
           )}
