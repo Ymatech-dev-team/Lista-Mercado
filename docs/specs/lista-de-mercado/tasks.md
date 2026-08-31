@@ -11,23 +11,25 @@
 ## Escopo 0 — Fundação (o esqueleto que sobe)
 Objetivo: um app Next.js vazio, no ar, conectado ao Neon. Nenhuma feature ainda — só a base de pé.
 
-- [ ] T0.1 — `git init` aqui + conectar remote `Ymatech-dev-team/Lista-Mercado`, branch `develop`. **Teste:** `git remote -v` aponta certo.
-- [ ] T0.2 — Scaffold Next.js (App Router) + TypeScript + Tailwind v4. **Teste:** `npm run build` passa; `npm run dev` abre a home padrão.
-- [ ] T0.3 — Instalar deps de base: Drizzle + `@neondatabase/serverless` + `drizzle-kit`. **Teste:** `npm run build` continua passando.
-- [ ] 🔴 T0.4 — Você cria o projeto no **Neon** (branch de dev) e me passa as 2 connection strings (pooled + direct). **Teste:** consigo listar tabelas (vazio).
-- [ ] 🔴 T0.5 — Você roda o **SQL do design.md §6** no Neon (dev). Eu só te entrego o bloco; você cola. **Teste:** query de verificação lista as 8 tabelas.
-- [ ] T0.6 — Schema Drizzle espelhando as 8 tabelas + camada `db/` (data-access) com helper que exige `userId`. **Teste:** um script de leitura conecta e retorna vazio sem erro.
-- [ ] T0.7 — `.env.example` + `.gitignore` (nunca versionar `.env`; nenhum segredo `NEXT_PUBLIC_`). **Teste:** `git status` não vê `.env`.
-- [ ] 🔴 T0.8 — Deploy inicial na **Vercel** conectada ao repo (só o hello world). **Teste:** URL da Vercel abre o app.
-- [ ] Review do escopo + seu ok.
+- [x] T0.1 — `git init` + remote `Ymatech-dev-team/Lista-Mercado`, branch `develop`. ✓ remote conectado.
+- [x] T0.2 — Scaffold Next.js 16 (App Router) + TypeScript + Tailwind v4. ✓ `npm run build` passa.
+- [x] T0.3 — Deps de base: Drizzle + `@neondatabase/serverless` + `drizzle-kit`. ✓ build ok.
+- [x] 🔴 T0.4 — Projeto Neon criado; 2 connection strings no `.env` (corrigida a direct que veio com `-pooler`). ✓
+- [x] 🔴 T0.5 — SQL do design.md §6 rodado no Neon. ✓ verificação retornou as 7 tabelas.
+- [x] T0.6 — Schema Drizzle das 7 tabelas (`src/db/schema.ts`) + cliente neon-http (`src/db/index.ts`). ✓ health-check conectou (7 tabelas, pooled+direct).
+- [x] T0.7 — `.env.example` + `.gitignore` (`.env` ignorado; nenhum `NEXT_PUBLIC_`). ✓
+- [ ] 🔴 T0.8 — Deploy inicial na **Vercel** conectada ao repo (hello world). **Teste:** URL da Vercel abre o app. ⏳ com o JP.
+- [x] Review do escopo (direta, por ser config; commit `6d823be` + push em `develop`). ✓
+- Falta só T0.8 (Vercel) pra fechar o escopo.
 
 ## Escopo 1 — Design-system base (tokens + componentes)
 Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de montar telas.
 
-- [ ] T1.1 — CSS variables light/dark (§9.2/9.3) + fontes (Familjen/Hanken/DM Mono) + toggle de tema. **Teste:** trocar tema muda tudo; body pinta bg do token.
-- [ ] T1.2 — Componentes-núcleo (§9.5): Botão, Input (texto/numérico), Item-da-lista, Chip, Card, Bottom-nav, Empty state, Toast, Modal de confirmação, Progress — com estados `focus-visible`/`pressed`/`disabled`/`loading`/`error`. **Teste:** página `/ui` mostra todos; foco por teclado visível; alvos ≥44px.
-- [ ] T1.3 — Checagem de contraste AA nos 2 temas na página `/ui`. **Teste:** revisão a11y aprova.
-- [ ] Review do escopo (design + a11y) + seu ok.
+- [x] T1.1 — CSS variables light/dark + fontes (Familjen/Hanken/DM Mono) + toggle (next-themes). ✓ validado no navegador nos 2 temas.
+- [x] T1.2 — Componentes-núcleo (§9.5): Button, Input, Checkbox, ListItem, Chip, Card, BottomNav, EmptyState, Toaster (sonner), ConfirmDialog (Radix), Progress — com estados. ✓ vitrine em `/ui`.
+- [x] T1.3 — Contraste AA + a11y revisados por painel (a11y/design + code-review). ✓
+- [x] Review do escopo (a11y/design + code-review adversariais); achados corrigidos (type=button, número ≥14px, erro com ícone+msg, verde contido, alvos ≥44px, radius, pressed). Build ✓.
+- Pronto pra commit (aguardando ok do JP).
 
 ## Escopo 2 — Autenticação (a mais sensível — vai devagar)
 > Divido em 2a e 2b porque é a parte perigosa. Cada metade revisa com foco de **segurança**.

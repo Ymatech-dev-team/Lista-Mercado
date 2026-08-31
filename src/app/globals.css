@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+/* Tema escuro por classe (.dark no <html>, gerido pelo next-themes) */
+@custom-variant dark (&:is(.dark *));
+
+/* ===== Tokens Mercadinho — TEMA CLARO (design.md §9.2) ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #fbfbf9;
+  --surface: #ffffff;
+  --surface-sunken: #f4f5f2;
+  --ink: #1a1e1b;
+  --muted: #5f6862;
+  --num: #545b54;
+  --primary: #17794c;
+  --primary-strong: #12633e;
+  --accent-fill: #1e8e5a;
+  --on-primary: #ffffff;
+  --on-danger: #ffffff;
+  --done: #6f776f;
+  --hairline: #e6e9e2;
+  --border-field: #8d958a;
+  --danger: #c62828;
+  --danger-border: #d32f2f;
+  --danger-bg: #fbeae7;
+  --warning: #b7791f;
+  --warning-bg: #faf3e4;
+  --info: #3a6ea5;
+  --focus-ring: #1f9d63;
+  --selection: #e4f1ea;
+  --disabled-fg: #b3b9b2;
+  --disabled-bg: #f0f1ee;
+  --overlay: rgba(26, 30, 27, 0.45);
+  --radius: 8px;
 }
 
+/* ===== Tokens Mercadinho — TEMA ESCURO OLED (design.md §9.3) ===== */
+.dark {
+  --bg: #0f110e;
+  --surface: #191c18;
+  --surface-sunken: #20241f;
+  --ink: #eaece7;
+  --muted: #8f968e;
+  --num: #a7aea6;
+  --primary: #33bd78;
+  --primary-strong: #58cc90;
+  --accent-fill: #2fae70;
+  --on-primary: #0f2a1e;
+  --on-danger: #2a1b18;
+  --done: #838a82;
+  --hairline: #272b27;
+  --border-field: #6c7268;
+  --danger: #ff6b6b;
+  --danger-border: #d93636;
+  --danger-bg: #2a1b18;
+  --warning: #e0a63b;
+  --warning-bg: #2a2417;
+  --info: #5b9bd5;
+  --focus-ring: #1f9d63;
+  --selection: #12331f;
+  --disabled-fg: #565c54;
+  --disabled-bg: #1f231e;
+  --overlay: rgba(0, 0, 0, 0.72);
+}
+
+/* ===== Mapeia tokens -> utilitários do Tailwind (bg-surface, text-ink, ...) ===== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-num: var(--num);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-accent-fill: var(--accent-fill);
+  --color-on-primary: var(--on-primary);
+  --color-on-danger: var(--on-danger);
+  --color-done: var(--done);
+  --color-hairline: var(--hairline);
+  --color-border-field: var(--border-field);
+  --color-danger: var(--danger);
+  --color-danger-border: var(--danger-border);
+  --color-danger-bg: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-info: var(--info);
+  --color-selection: var(--selection);
+  --color-disabled-fg: var(--disabled-fg);
+  --color-disabled-bg: var(--disabled-bg);
+  --font-display: var(--font-familjen);
+  --font-body: var(--font-hanken);
+  --font-num: var(--font-dmmono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--hairline);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+  /* Foco visível padrão — verde que passa AA nos 2 temas (design.md §9.6) */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--selection);
+  }
 }
