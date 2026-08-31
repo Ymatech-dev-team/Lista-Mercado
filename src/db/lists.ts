@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { lists } from "@/db/schema";
-import { and, eq, isNull } from "drizzle-orm";
+import { lists, listItems } from "@/db/schema";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
 export async function getActiveList(userId: string) {
   const [row] = await db
@@ -17,8 +17,49 @@ export async function getOrCreateActiveList(userId: string) {
   if (existing) return existing;
   const inserted = await db.insert(lists).values({ userId, status: "active" }).onConflictDoNothing().returning();
   if (inserted[0]) return inserted[0];
-  // Conflito no índice → já existe uma ativa (criada em paralelo).
   const active = await getActiveList(userId);
   if (!active) throw new Error("Falha ao obter a lista ativa.");
   return active;
+}
+
+// Conclui a lista ativa (atômico e idempotente): só afeta se ainda está ativa. design.md RF5.
+export async function completeActiveList(userId: string) {
+  const [row] = await db
+    .update(lists)
+    .set({ status: "completed", completedAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(lists.userId, userId), eq(lists.status, "active"), isNull(lists.deletedAt)))
+    .returning();
+  return row ?? null;
+}
+
+// Histórico: listas concluídas com resumo (total de itens e quantos foram comprados).
+export async function getCompletedLists(userId: string) {
+  return db
+    .select({
+      id: lists.id,
+      completedAt: lists.completedAt,
+      total: sql<number>`count(${listItems.id})::int`,
+      comprados: sql<number>`count(*) filter (where ${listItems.isPurchased})::int`,
+    })
+    .from(lists)
+    .leftJoin(listItems, eq(listItems.listId, lists.id))
+    .where(and(eq(lists.userId, userId), eq(lists.status, "completed"), isNull(lists.deletedAt)))
+    .groupBy(lists.id, lists.completedAt)
+    .orderBy(desc(lists.completedAt));
+}
+
+export async function getCompletedListById(userId: string, listId: string) {
+  const [row] = await db
+    .select({ id: lists.id, completedAt: lists.completedAt })
+    .from(lists)
+    .where(
+      and(
+        eq(lists.id, listId),
+        eq(lists.userId, userId),
+        eq(lists.status, "completed"),
+        isNull(lists.deletedAt)
+      )
+    )
+    .limit(1);
+  return row ?? null;
 }

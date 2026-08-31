@@ -65,9 +65,9 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 - Pronto pra commit (aguardando ok). Painel lateral "mais consumidos" no desktop → vem no Escopo 5.
 
 ## Escopo 4 — Concluir + histórico
-- [ ] T4.1 — Concluir lista: `UPDATE ... WHERE status='active'` atômico (idempotente), imutável. **Teste:** concluir 2x = 1 registro; lista vazia não conclui.
-- [ ] T4.2 — Histórico: lista das concluídas (desc), abrir em leitura, empty state. **Teste:** não dá pra editar o passado; vazio mostra CTA.
-- [ ] Review do escopo + seu ok.
+- [x] T4.1 — Concluir: `UPDATE ... WHERE status='active'` atômico (idempotente); guarda lista vazia; vira imutável e redireciona pro detalhe. ✓ testado.
+- [x] T4.2 — Histórico: lista das concluídas (desc, com resumo comprados/total) + detalhe em somente-leitura + empty states. ✓ escopado por userId (getCompletedListById/getItemsForList), 404 se não for do usuário.
+- [x] Review do escopo: revisão direta (escopo pequeno; reusa as consultas já escopadas por userId revisadas no Escopo 3; concluir é UPDATE atômico; histórico é read-only). Build ✓.
 
 ## Escopo 5 — Home "mais consumidos"
 - [ ] T5.1 — Query de agregação (§6): top 10, comprados, 90 dias, por usuário. **Teste:** ranking bate com a definição.

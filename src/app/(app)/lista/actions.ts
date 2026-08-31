@@ -2,11 +2,12 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
-import { getOrCreateActiveList } from "@/db/lists";
+import { getOrCreateActiveList, getActiveList, completeActiveList } from "@/db/lists";
 import { findOrCreateProduct } from "@/db/products";
-import { addItem, removeItem, restoreItem } from "@/db/list-items";
+import { addItem, removeItem, restoreItem, getItemsForList } from "@/db/list-items";
 
 export type AddItemState = { error?: string; ok?: boolean };
 
@@ -62,4 +63,21 @@ export async function restoreItemAction(data: unknown): Promise<void> {
   const { listId, productId, quantity, isPurchased } = parsed.data;
   await restoreItem(user.id, listId, productId, quantity, isPurchased);
   revalidatePath("/lista");
+}
+
+// Conclui a compra: lista vira histórico imutável (design.md RF5).
+export async function concludeListAction(): Promise<{ error?: string } | void> {
+  const user = await requireUser();
+  const active = await getActiveList(user.id);
+  if (!active) return { error: "Nenhuma lista ativa para concluir." };
+
+  const items = await getItemsForList(user.id, active.id);
+  if (items.length === 0) return { error: "Adicione itens antes de concluir." };
+
+  const completed = await completeActiveList(user.id);
+  if (!completed) return { error: "Não foi possível concluir agora." };
+
+  revalidatePath("/lista");
+  revalidatePath("/historico");
+  redirect(`/historico/${completed.id}`);
 }
