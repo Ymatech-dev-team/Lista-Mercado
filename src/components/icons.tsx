@@ -48,6 +48,9 @@ export const AlertTriangle = (p: SVGProps<SVGSVGElement>) => (
 export const X = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><path d="M6 6l12 12M18 6L6 18" /></Icon>
 );
+export const MailIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M4 7l8 6 8-6" /></Icon>
+);
 export const Spinner = (p: SVGProps<SVGSVGElement>) => (
   <Icon strokeWidth={2.5} {...p}>
     <path d="M12 3a9 9 0 1 0 9 9" opacity={0.9} />

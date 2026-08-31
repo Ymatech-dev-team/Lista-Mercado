@@ -34,10 +34,15 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 ## Escopo 2 — Autenticação (a mais sensível — vai devagar)
 > Divido em 2a e 2b porque é a parte perigosa. Cada metade revisa com foco de **segurança**.
 
-**2a — Cadastro + verificação de e-mail**
-- [ ] 🔴 T2.1 — Você cria contas **Resend** (e-mail) e **Upstash** (rate limit) e me passa as chaves (via `.env`, nunca no chat). 
-- [ ] T2.2 — Cadastro: form + hash argon2id (`runtime='nodejs'`), grava `consent_at`/`privacy_version`, e-mail único. **Teste (falha primeiro):** senha nunca em texto no banco; e-mail duplicado rejeitado.
-- [ ] T2.3 — Verificação de e-mail: token hasheado single-use + envio Resend; conta só ativa após confirmar. **Teste:** link expira/uso único; conta não-verificada não loga.
+**2a — Cadastro + verificação de e-mail** ✅ construído, testado no navegador + banco, revisado por AppSec.
+- [ ] 🔴 T2.1 — Você cria contas **Resend** + **Upstash** e põe as chaves no `.env`. ⏳ (dev roda sem elas: e-mail cai no console, rate limit é no-op).
+- [x] T2.2 — Cadastro: form + hash argon2id (`runtime='nodejs'`), grava consentimento, e-mail único. ✓ senha guardada como `$argon2id`; anti-enumeração (resposta idêntica + e-mail apropriado); rate limit (Upstash, fail-closed em prod).
+- [x] T2.3 — Verificação: token só-hash single-use atômico + envio (Resend/console); confirma por POST (não GET). ✓ testado ponta a ponta.
+
+> **Dívida de segurança — pré-produção (do laudo AppSec):**
+> - 🔴 Ativar o rate limit de verdade (criar Upstash + chaves no `.env`/Vercel) — hoje é no-op em dev.
+> - 🟠 Expirar contas não-verificadas (anti-squatting) + **bloquear login de conta não-verificada** (fecha no 2b).
+> - 🟡 Rotacionar a credencial do Neon antes de prod; segredos só nos env da Vercel.
 
 **2b — Login + sessão + reset**
 - [ ] T2.4 — Login: timing-safe (hash dummy p/ e-mail inexistente), mensagem genérica, rate limit Upstash (IP+conta). **Teste:** e-mail inexistente não vaza por tempo; 6ª tentativa dá 429.
