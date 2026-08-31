@@ -57,11 +57,12 @@ export function AppShell({ userEmail, children }: { userEmail: string; children:
   }
 
   return (
-    <div className="md:flex md:min-h-full">
+    <div className="md:flex md:min-h-screen">
       {/* Barra lateral colapsável — desktop */}
       <aside
         className={cn(
-          "hidden flex-none flex-col border-r border-hairline bg-surface-sunken p-3 transition-[width] duration-200 md:flex",
+          "hidden flex-none flex-col border-r border-hairline bg-surface-sunken p-3 transition-[width] duration-200",
+          "md:flex md:sticky md:top-0 md:h-screen md:overflow-y-auto",
           collapsed ? "w-[72px]" : "w-60"
         )}
       >
