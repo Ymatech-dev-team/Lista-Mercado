@@ -56,11 +56,13 @@ Objetivo: os componentes do §9 existindo e visíveis nos 2 temas, antes de mont
 > - 🟡 Rotacionar credencial do Neon; timing residual no "esqueci senha" (mitigado por rate limit); CSP completa; verificar senha vazada (HIBP).
 
 ## Escopo 3 — Listas + itens (o coração)
-- [ ] T3.1 — Criar lista (1 ativa via índice único; idempotente). **Teste:** duplo clique = 1 lista; F5 recupera.
-- [ ] T3.2 — Adicionar item: produto canônico (normalização no código), merge por nome, `CHECK(quantity>0)`. **Teste:** "Leite"+"leite " = 1 item somado; qty 0 vira 1.
-- [ ] T3.3 — Marcar item **otimista** (Route Handler PUT + Origin check, fila localStorage, não reverte em falha de rede). **Teste:** pinta ≤200ms; net cai e volta → persiste sem reclique; marcar 3x = 1 estado.
-- [ ] T3.4 — Remover item com **desfazer** (toast undo); item removido não apaga o produto. **Teste:** undo restaura; produto continua.
-- [ ] Review do escopo (code + a11y/resiliência) + seu ok.
+- [x] T3.1 — Criar lista (auto, 1 ativa via índice único parcial, idempotente). ✓ testado.
+- [x] T3.2 — Adicionar item: produto canônico (normalização no código, acento-insensível), merge de quantidade. ✓ "Arroz"+"arroz" = 1 item qty 3.
+- [x] T3.3 — Marcar otimista (Route Handler PUT + Origin, fila localStorage com timeout/AbortController, sessão expirada preservada). ✓ testado.
+- [x] T3.4 — Remover com desfazer; produto sobrevive à remoção. ✓ (Leite continua no catálogo).
+- [x] **App shell responsivo** (feedback do JP): barra lateral no desktop, abas na base no celular; claro + escuro. ✓ testado nas 2 telas/temas.
+- [x] Review do escopo (code-review + security-review adversariais). Corrigidos: IDOR de produto no restore, escopo de `getItemsForList`, validação de entrada do restore, e os 3 bugs de resiliência da fila (race, timeout, 401). Build ✓.
+- Pronto pra commit (aguardando ok). Painel lateral "mais consumidos" no desktop → vem no Escopo 5.
 
 ## Escopo 4 — Concluir + histórico
 - [ ] T4.1 — Concluir lista: `UPDATE ... WHERE status='active'` atômico (idempotente), imutável. **Teste:** concluir 2x = 1 registro; lista vazia não conclui.
