@@ -52,6 +52,8 @@ export const products = pgTable("products", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   displayName: text("display_name").notNull(),
   normalizedName: text("normalized_name").notNull(),
+  category: text("category").notNull().default("outros"), // seção de mercado; CHECK (IN ...) no SQL. Ver lib/categories.ts
+
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
   deletedAt: ts("deleted_at"),
