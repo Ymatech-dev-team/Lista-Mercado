@@ -25,8 +25,9 @@ export default async function HistoricoPage() {
                 className="flex items-center justify-between gap-4 rounded-xl border border-hairline bg-surface p-4 transition-colors hover:bg-surface-sunken"
               >
                 <div>
-                  <p className="font-medium text-ink">Compra de {formatDatePt(l.completedAt)}</p>
+                  <p className="font-medium text-ink">{l.title ?? `Compra de ${formatDatePt(l.completedAt)}`}</p>
                   <p className="mt-0.5 text-sm text-muted">
+                    {l.title ? `${formatDatePt(l.completedAt)} · ` : ""}
                     <span className="font-[family-name:var(--font-num)] tabular-nums">{l.comprados}</span> de{" "}
                     <span className="font-[family-name:var(--font-num)] tabular-nums">{l.total}</span> itens comprados
                   </p>

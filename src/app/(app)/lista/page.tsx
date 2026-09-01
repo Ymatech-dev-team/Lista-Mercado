@@ -10,6 +10,7 @@ import { MostConsumed } from "@/components/most-consumed";
 import { AddItemForm } from "./add-item-form";
 import { ListView } from "./list-view";
 import { RepeatButton } from "./repeat-button";
+import { ListTitle } from "./list-title";
 import { Suggestions, type Suggestion } from "./suggestions";
 
 export const runtime = "nodejs";
@@ -49,9 +50,9 @@ export default async function ListaPage() {
     <div className="mx-auto flex w-full max-w-5xl gap-10 px-5 py-8 md:px-10 md:py-10">
       <div className="min-w-0 max-w-2xl flex-1">
         <header className="mb-6 flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <p className="font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-muted">lista ativa</p>
-            <h1 className="font-[family-name:var(--font-display)] text-[24px] font-semibold text-ink">Minha lista</h1>
+            <ListTitle initialTitle={list?.title ?? null} />
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
             {completed.length > 0 && <RepeatButton />}

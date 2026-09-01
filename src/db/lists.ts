@@ -30,6 +30,14 @@ export async function getOrCreateActiveList(userId: string) {
   return active;
 }
 
+// Define o nome da lista ATIVA (RF nome-da-lista). Escopado por userId + só a ativa (histórico não muda).
+export async function setActiveListTitle(userId: string, title: string | null) {
+  await db
+    .update(lists)
+    .set({ title, updatedAt: new Date() })
+    .where(and(eq(lists.userId, userId), eq(lists.status, "active"), isNull(lists.deletedAt)));
+}
+
 // Conclui a lista ativa (atômico e idempotente): só afeta se ainda está ativa. design.md RF5.
 export async function completeActiveList(userId: string) {
   const [row] = await db
@@ -45,6 +53,7 @@ export async function getCompletedLists(userId: string) {
   return db
     .select({
       id: lists.id,
+      title: lists.title,
       completedAt: lists.completedAt,
       total: sql<number>`count(${listItems.id})::int`,
       comprados: sql<number>`count(*) filter (where ${listItems.isPurchased})::int`,
@@ -110,7 +119,7 @@ export async function getLastCompletedTotalCents(userId: string): Promise<number
 
 export async function getCompletedListById(userId: string, listId: string) {
   const [row] = await db
-    .select({ id: lists.id, completedAt: lists.completedAt })
+    .select({ id: lists.id, title: lists.title, completedAt: lists.completedAt })
     .from(lists)
     .where(
       and(

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
-import { getOrCreateActiveList, getActiveList, completeActiveList, getCompletedLists } from "@/db/lists";
+import { getOrCreateActiveList, getActiveList, completeActiveList, getCompletedLists, setActiveListTitle } from "@/db/lists";
 import { findOrCreateProduct, getUserProduct, getRememberedPrices, setProductCategory } from "@/db/products";
 import { addItem, removeItem, restoreItem, getItemsForList, setItemPrice } from "@/db/list-items";
 import { isCategory } from "@/lib/categories";
@@ -91,6 +91,17 @@ export async function quickAddAction(productId: string): Promise<{ ok?: boolean;
   const item = await addItem(list.id, productId, 1);
   await applyRememberedPrice(user.id, item.id, productId, item.unitPriceCents);
 
+  revalidatePath("/lista");
+  revalidatePath("/inicio");
+  return { ok: true };
+}
+
+// Define o nome da lista ativa (garante uma lista ativa; vazio → sem nome). Máx. 60 chars.
+export async function setListTitleAction(rawTitle: string): Promise<{ ok?: boolean; error?: string }> {
+  const user = await requireUser();
+  const title = String(rawTitle ?? "").trim().slice(0, 60);
+  await getOrCreateActiveList(user.id); // garante que existe uma lista ativa pra nomear
+  await setActiveListTitle(user.id, title === "" ? null : title);
   revalidatePath("/lista");
   revalidatePath("/inicio");
   return { ok: true };

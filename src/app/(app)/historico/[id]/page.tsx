@@ -31,9 +31,10 @@ export default async function HistoricoDetailPage({ params }: { params: Promise<
         ← Histórico
       </Link>
       <h1 className="mt-3 font-[family-name:var(--font-display)] text-[22px] font-semibold text-ink">
-        Compra de {formatDatePt(list.completedAt)}
+        {list.title ?? `Compra de ${formatDatePt(list.completedAt)}`}
       </h1>
       <p className="mb-6 mt-0.5 text-sm text-muted">
+        {list.title ? `${formatDatePt(list.completedAt)} · ` : ""}
         <span className="font-[family-name:var(--font-num)] tabular-nums">{comprados}</span> de{" "}
         <span className="font-[family-name:var(--font-num)] tabular-nums">{items.length}</span> itens comprados · somente leitura
       </p>
