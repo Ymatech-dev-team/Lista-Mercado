@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   emailVerifiedAt: ts("email_verified_at"),
   consentAt: ts("consent_at").notNull(),
   privacyVersion: text("privacy_version").notNull(),
+  monthlyBudgetCents: integer("monthly_budget_cents"), // teto de gasto mensal opcional; NULL = sem teto. CHECK (>=0) no SQL
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
   deletedAt: ts("deleted_at"),
@@ -72,6 +73,7 @@ export const listItems = pgTable("list_items", {
   listId: uuid("list_id").notNull().references(() => lists.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull().default(1), // CHECK (quantity > 0) no SQL
+  unitPriceCents: integer("unit_price_cents"), // snapshot do preço unitário; NULL = sem preço (≠ 0). CHECK (>=0) no SQL
   isPurchased: boolean("is_purchased").notNull().default(false),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
