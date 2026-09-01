@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import { getCompletedListById } from "@/db/lists";
 import { getItemsForList } from "@/db/list-items";
 import { formatDatePt } from "@/lib/date";
+import { formatBRL } from "@/lib/money";
 import { Check } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,8 @@ export default async function HistoricoDetailPage({ params }: { params: Promise<
 
   const items = await getItemsForList(user.id, id);
   const comprados = items.filter((i) => i.isPurchased).length;
+  const totalCents = items.reduce((s, i) => s + (i.unitPriceCents ?? 0) * i.quantity, 0);
+  const semPreco = items.filter((i) => i.unitPriceCents == null).length;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 md:px-10 md:py-10">
@@ -45,13 +48,23 @@ export default async function HistoricoDetailPage({ params }: { params: Promise<
             >
               <Check className="h-3 w-3" />
             </span>
-            <span className={cn("flex-1 text-sm", it.isPurchased ? "text-done" : "text-ink")}>{it.name}</span>
+            <span className={cn("min-w-0 flex-1 truncate text-sm", it.isPurchased ? "text-done" : "text-ink")}>{it.name}</span>
             {it.quantity > 1 && (
-              <span className="font-[family-name:var(--font-num)] tabular-nums text-xs text-num">{it.quantity}</span>
+              <span className="font-[family-name:var(--font-num)] tabular-nums text-xs text-muted">×{it.quantity}</span>
             )}
+            <span className="min-w-[64px] text-right font-[family-name:var(--font-num)] tabular-nums text-sm text-num">
+              {it.unitPriceCents != null ? formatBRL(it.unitPriceCents * it.quantity) : "—"}
+            </span>
           </li>
         ))}
       </ul>
+
+      <div className="mt-4 flex items-baseline justify-between border-t border-hairline pt-3">
+        <span className="text-[11px] uppercase tracking-[0.09em] text-muted">
+          {semPreco > 0 ? `total · ${semPreco} sem preço` : "total"}
+        </span>
+        <span className="font-[family-name:var(--font-num)] tabular-nums text-lg font-medium text-ink">{formatBRL(totalCents)}</span>
+      </div>
     </div>
   );
 }

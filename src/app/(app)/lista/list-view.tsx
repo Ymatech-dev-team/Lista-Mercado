@@ -6,6 +6,7 @@ import { ListItem } from "@/components/ui/list-item";
 import { Progress } from "@/components/ui/progress";
 import { formatBRL } from "@/lib/money";
 import { normalizePendingQueue, type Pending, type PendingQueue } from "@/lib/pending-queue";
+import { ConcludeButton } from "./conclude-button";
 import { removeItemAction, restoreItemAction } from "./actions";
 
 export type Item = {
@@ -24,7 +25,15 @@ type Field = keyof Pending;
 const TIMEOUT_MS = 8000;
 const FIELDS: Field[] = ["purchased", "quantity", "priceCents"];
 
-export function ListView({ listId, initialItems }: { listId: string; initialItems: Item[] }) {
+export function ListView({
+  listId,
+  initialItems,
+  remembered,
+}: {
+  listId: string;
+  initialItems: Item[];
+  remembered: Record<string, number>;
+}) {
   const pendingKey = `mm:pending:${listId}`;
 
   // ---- fila de reenvio persistida: sempre re-lê o localStorage antes de escrever ----
@@ -259,6 +268,7 @@ export function ListView({ listId, initialItems }: { listId: string; initialItem
               name={it.name}
               quantity={it.quantity}
               unitPriceCents={it.unitPriceCents}
+              rememberedCents={remembered[it.productId] ?? null}
               checked={it.isPurchased}
               onToggle={() => toggle(it)}
               onRemove={() => remove(it)}
@@ -278,6 +288,10 @@ export function ListView({ listId, initialItems }: { listId: string; initialItem
           )}
         </span>
         <span className="font-[family-name:var(--font-num)] tabular-nums text-lg font-medium text-ink">{formatBRL(totalCents)}</span>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <ConcludeButton missingCount={missing} />
       </div>
     </div>
   );

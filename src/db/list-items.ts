@@ -2,9 +2,15 @@ import { db } from "@/db";
 import { listItems, lists, products } from "@/db/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
-// Subconsulta de posse: o item precisa pertencer a uma lista do usuário (anti-IDOR, design.md §1).
+// Posse p/ LEITURA: item pertence a uma lista do usuário (anti-IDOR, design.md §1).
 const ownedByUser = (userId: string) =>
   sql`${listItems.listId} in (select id from lists where user_id = ${userId})`;
+
+// Posse p/ ESCRITA: além de ser do usuário, a lista precisa estar ATIVA. Trava a imutabilidade do
+// histórico no servidor (RF14/RF15) — sem isso, um PUT direto ou uma corrida preço-em-voo × conclusão
+// alteraria o total de uma compra já concluída. UI read-only não basta para dinheiro.
+const ownedActiveByUser = (userId: string) =>
+  sql`${listItems.listId} in (select id from lists where user_id = ${userId} and status = 'active' and deleted_at is null)`;
 
 export async function getItemsForList(userId: string, listId: string) {
   return db
@@ -40,7 +46,7 @@ export async function setItemPurchased(userId: string, itemId: string, purchased
   const res = await db
     .update(listItems)
     .set({ isPurchased: purchased, updatedAt: new Date() })
-    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .where(and(eq(listItems.id, itemId), ownedActiveByUser(userId)))
     .returning({ id: listItems.id });
   return res.length > 0;
 }
@@ -51,7 +57,7 @@ export async function setItemQuantity(userId: string, itemId: string, quantity: 
   const res = await db
     .update(listItems)
     .set({ quantity: q, updatedAt: new Date() })
-    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .where(and(eq(listItems.id, itemId), ownedActiveByUser(userId)))
     .returning({ id: listItems.id });
   return res.length > 0;
 }
@@ -62,7 +68,7 @@ export async function setItemPrice(userId: string, itemId: string, priceCents: n
   const res = await db
     .update(listItems)
     .set({ unitPriceCents: priceCents, updatedAt: new Date() })
-    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .where(and(eq(listItems.id, itemId), ownedActiveByUser(userId)))
     .returning({ id: listItems.id });
   return res.length > 0;
 }
@@ -70,7 +76,7 @@ export async function setItemPrice(userId: string, itemId: string, priceCents: n
 export async function removeItem(userId: string, itemId: string) {
   const [row] = await db
     .delete(listItems)
-    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .where(and(eq(listItems.id, itemId), ownedActiveByUser(userId)))
     .returning();
   return row ?? null;
 }
@@ -87,9 +93,9 @@ export async function restoreItem(
   const ownsList = await db
     .select({ id: lists.id })
     .from(lists)
-    .where(and(eq(lists.id, listId), eq(lists.userId, userId)))
+    .where(and(eq(lists.id, listId), eq(lists.userId, userId), eq(lists.status, "active"), isNull(lists.deletedAt)))
     .limit(1);
-  if (!ownsList.length) return null;
+  if (!ownsList.length) return null; // só restaura em lista ativa (não mexe no histórico)
 
   const ownsProduct = await db
     .select({ id: products.id })

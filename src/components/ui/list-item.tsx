@@ -7,6 +7,7 @@ type ListItemProps = {
   name: string;
   quantity?: number;
   unitPriceCents?: number | null;
+  rememberedCents?: number | null;
   checked?: boolean;
   onToggle?: () => void;
   onRemove?: () => void;
@@ -22,6 +23,7 @@ export function ListItem({
   name,
   quantity,
   unitPriceCents,
+  rememberedCents,
   checked = false,
   onToggle,
   onRemove,
@@ -80,7 +82,7 @@ export function ListItem({
           {RemoveBtn}
         </div>
 
-        <div className="flex items-center gap-2 pl-9 pt-0.5">
+        <div className="flex flex-wrap items-center gap-2 pl-9 pt-0.5">
           <div className="flex flex-none items-center rounded-lg border border-hairline">
             <button
               type="button"
@@ -102,7 +104,14 @@ export function ListItem({
             </button>
           </div>
           <span className="text-xs text-muted">×</span>
-          {onPriceChange && <PriceField name={name} valueCents={unitPriceCents ?? null} onCommit={onPriceChange} />}
+          {onPriceChange && (
+            <>
+              <PriceField name={name} valueCents={unitPriceCents ?? null} onCommit={onPriceChange} />
+              {unitPriceCents != null && rememberedCents != null && unitPriceCents === rememberedCents && (
+                <span className="text-[10px] text-muted">lembrado</span>
+              )}
+            </>
+          )}
         </div>
       </div>
     );

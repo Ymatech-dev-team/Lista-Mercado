@@ -6,10 +6,19 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
 import { getOrCreateActiveList, getActiveList, completeActiveList, getCompletedLists } from "@/db/lists";
-import { findOrCreateProduct, getUserProduct } from "@/db/products";
-import { addItem, removeItem, restoreItem, getItemsForList } from "@/db/list-items";
+import { findOrCreateProduct, getUserProduct, getRememberedPrices } from "@/db/products";
+import { addItem, removeItem, restoreItem, getItemsForList, setItemPrice } from "@/db/list-items";
 
 export type AddItemState = { error?: string; ok?: boolean };
+
+// Opção B (D2/RF24): ao adicionar um item que ficou SEM preço, aplica o último preço pago daquele
+// produto (derivado do histórico). Editável depois; a etiqueta "lembrado" fica enquanto não mudar.
+async function applyRememberedPrice(userId: string, itemId: string, productId: string, currentPrice: number | null) {
+  if (currentPrice != null) return;
+  const r = await getRememberedPrices(userId, [productId]);
+  const cents = r[productId];
+  if (cents != null) await setItemPrice(userId, itemId, cents);
+}
 
 export async function addItemAction(_prev: AddItemState, formData: FormData): Promise<AddItemState> {
   const user = await requireUser();
@@ -22,7 +31,8 @@ export async function addItemAction(_prev: AddItemState, formData: FormData): Pr
   const { name, quantity } = parsed.data;
   const list = await getOrCreateActiveList(user.id);
   const product = await findOrCreateProduct(user.id, name);
-  await addItem(list.id, product.id, quantity);
+  const item = await addItem(list.id, product.id, quantity);
+  await applyRememberedPrice(user.id, item.id, product.id, item.unitPriceCents);
 
   revalidatePath("/lista");
   return { ok: true };
@@ -77,7 +87,8 @@ export async function quickAddAction(productId: string): Promise<{ ok?: boolean;
   if (!product) return { error: "Produto não encontrado." };
 
   const list = await getOrCreateActiveList(user.id);
-  await addItem(list.id, productId, 1);
+  const item = await addItem(list.id, productId, 1);
+  await applyRememberedPrice(user.id, item.id, productId, item.unitPriceCents);
 
   revalidatePath("/lista");
   revalidatePath("/inicio");
@@ -91,7 +102,8 @@ export async function addSuggestionAction(name: string): Promise<{ ok?: boolean;
   if (!clean) return { error: "Nome inválido." };
   const list = await getOrCreateActiveList(user.id);
   const product = await findOrCreateProduct(user.id, clean);
-  await addItem(list.id, product.id, 1);
+  const item = await addItem(list.id, product.id, 1);
+  await applyRememberedPrice(user.id, item.id, product.id, item.unitPriceCents);
   revalidatePath("/lista");
   revalidatePath("/inicio");
   return { ok: true };
@@ -108,8 +120,12 @@ export async function repeatLastAction(): Promise<{ error?: string } | void> {
   if (lastItems.length === 0) return { error: "A última compra está vazia." };
 
   const active = await getOrCreateActiveList(user.id);
+  const remembered = await getRememberedPrices(user.id, lastItems.map((i) => i.productId));
   for (const it of lastItems) {
-    await addItem(active.id, it.productId, it.quantity);
+    const added = await addItem(active.id, it.productId, it.quantity);
+    if (added.unitPriceCents == null && remembered[it.productId] != null) {
+      await setItemPrice(user.id, added.id, remembered[it.productId]);
+    }
   }
   revalidatePath("/lista");
   revalidatePath("/inicio");

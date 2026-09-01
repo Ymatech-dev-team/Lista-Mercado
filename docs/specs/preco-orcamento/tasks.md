@@ -25,12 +25,14 @@ Legenda: `[ ]` a fazer · `[x]` feito · `→` critério de aceite (EARS) · `T:
 - [x] **1.4 `ListItem` Opção B:** linha 2 com stepper + campo de preço (`inputMode="decimal"`), autofill editável, subtotal, estados "—"/"definir preço"; somente-leitura quando concluída. → RF2/RF3/RF5/RF15/D2. `T:` render states.
 - [x] **1.5 `list-view`:** `putPrice` com fila; subtotal/total otimista; rodapé "total parcial · N sem preço". → RF5/RF12/RF13.
 
-## Escopo 2 — Conclusão imutável + repetir + preço lembrado
+## Escopo 2 — Conclusão imutável + repetir + preço lembrado — FEITO (review aplicado)
 
-- [ ] **2.1** `concludeListAction`/UI: `ConfirmDialog` se há item sem preço. → RF16.
-- [ ] **2.2** Histórico somente-leitura (sem stepper/edição de preço). → RF15.
-- [ ] **2.3** `repeatLastAction` não copia preço como definitivo; oferece como lembrado. → RF17.
-- [ ] **2.4** `products.getRememberedPrices(userId, productIds)` (`DISTINCT ON`, escopado) + autofill. → RF24/RF25/ADR-2/RNF3.
+- [x] **2.1** Concluir com aviso dinâmico (`missingCount` vivo no rodapé do ListView). → RF16.
+- [x] **2.2** Histórico somente-leitura + preço/subtotal/total read-only. → RF15.
+- [x] **2.3** `repeatLastAction` não copia snapshot; reaplica preço lembrado (opção B). → RF17.
+- [x] **2.4** `getRememberedPrices` (`DISTINCT ON`, escopado por userId) + auto-aplicar no add (opção B) + tag "lembrado". → RF24/RF25/ADR-2/RNF3.
+- [x] **2.5 (review):** trava de imutabilidade no servidor — `ownedActiveByUser` nas escritas (preço/qtd/comprado) + restore só em lista ativa. → RF14/RF15.
+- [x] **2.6 (review):** mobile ≤320px — `flex-wrap` na 2ª linha.
 
 ## Escopo 3 — Gasto do mês + comparação + teto
 

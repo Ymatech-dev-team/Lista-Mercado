@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/require-user";
 import { getActiveList, getCompletedLists } from "@/db/lists";
 import { getItemsForList } from "@/db/list-items";
-import { getMostConsumed } from "@/db/products";
+import { getMostConsumed, getRememberedPrices } from "@/db/products";
 import { getCoBoughtProducts } from "@/db/suggestions";
 import { getCuratedSuggestions } from "@/lib/suggestions";
 import { normalizeProductName } from "@/lib/products/normalize";
 import { MostConsumed } from "@/components/most-consumed";
 import { AddItemForm } from "./add-item-form";
 import { ListView } from "./list-view";
-import { ConcludeButton } from "./conclude-button";
 import { RepeatButton } from "./repeat-button";
 import { Suggestions, type Suggestion } from "./suggestions";
 
@@ -24,6 +23,9 @@ export default async function ListaPage() {
     getCompletedLists(user.id),
   ]);
   const items = list ? await getItemsForList(user.id, list.id) : [];
+  // Preço lembrado de todos os itens: aplicado no add (server), e usado p/ a etiqueta "lembrado"
+  // enquanto o preço ainda for o valor lembrado (D2 opção B / RF24).
+  const remembered = items.length ? await getRememberedPrices(user.id, items.map((i) => i.productId)) : {};
 
   // Sugestões: co-ocorrência (personalizado) + combos fixos, excluindo o que já está na lista.
   let suggestions: Suggestion[] = [];
@@ -53,7 +55,6 @@ export default async function ListaPage() {
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
             {completed.length > 0 && <RepeatButton />}
-            {items.length > 0 && <ConcludeButton />}
           </div>
         </header>
 
@@ -63,7 +64,7 @@ export default async function ListaPage() {
 
         {list && items.length > 0 ? (
           <>
-            <ListView listId={list.id} initialItems={items} />
+            <ListView listId={list.id} initialItems={items} remembered={remembered} />
             <Suggestions items={suggestions} />
           </>
         ) : (

@@ -11,6 +11,8 @@ function centsToInput(cents: number): string {
 
 // Campo de preço por item. Buffer local permite digitação parcial ("12,"); commit no blur/Enter.
 // Preço inválido reverte para o último válido (design.md RF4). Vazio limpa o preço (null).
+// O preço lembrado é aplicado no servidor ao adicionar (D2 — opção B), então aqui o campo edita
+// sempre um valor real; a etiqueta "lembrado" fica no ListItem.
 export function PriceField({
   name,
   valueCents,
@@ -72,7 +74,7 @@ export function PriceField({
         }}
         placeholder="0,00"
         aria-label={`Preço de ${name}`}
-        className="w-16 bg-transparent font-[family-name:var(--font-num)] text-sm text-ink outline-none placeholder:text-muted"
+        className="w-14 bg-transparent font-[family-name:var(--font-num)] text-sm text-ink outline-none placeholder:text-muted"
       />
     </span>
   );
