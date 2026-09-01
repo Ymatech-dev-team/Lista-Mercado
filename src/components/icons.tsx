@@ -57,6 +57,12 @@ export const ChevronLeft = (p: SVGProps<SVGSVGElement>) => (
 export const MailIcon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M4 7l8 6 8-6" /></Icon>
 );
+export const Sun = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></Icon>
+);
+export const Moon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}><path d="M20 13.5A8 8 0 1 1 10.5 4a6.2 6.2 0 0 0 9.5 9.5z" /></Icon>
+);
 export const Spinner = (p: SVGProps<SVGSVGElement>) => (
   <Icon strokeWidth={2.5} {...p}>
     <path d="M12 3a9 9 0 1 0 9 9" opacity={0.9} />

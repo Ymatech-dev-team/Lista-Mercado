@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { HomeIcon, ListIcon, ClockIcon, UserIcon, ChevronLeft, ChevronRight } from "@/components/icons";
 
 const NAV = [
@@ -106,7 +107,8 @@ export function AppShell({ userEmail, children }: { userEmail: string; children:
           ))}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-2">
+          <ThemeToggle collapsed={collapsed} />
           {collapsed ? (
             <Link
               href="/perfil"

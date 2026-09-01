@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/require-user";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,9 @@ export default async function PerfilPage() {
         <p className="mt-1 text-ink">{user.email}</p>
       </Card>
 
+      <p className="mb-2 font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-muted">aparência</p>
       <div className="mb-8 flex flex-col gap-3">
+        <ThemeToggle className="h-11 w-full justify-start border border-hairline bg-surface px-4 text-ink" />
         <a href="/api/export" className={cn(buttonVariants({ variant: "secondary" }), "w-full")}>
           Exportar meus dados
         </a>
