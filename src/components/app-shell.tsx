@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
+import { AmbientBackground } from "@/components/ambient-background";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { HomeIcon, ListIcon, ClockIcon, UserIcon, ChevronLeft, ChevronRight } from "@/components/icons";
 
@@ -59,6 +60,7 @@ export function AppShell({ userEmail, children }: { userEmail: string; children:
 
   return (
     <div className="md:flex md:min-h-screen">
+      <AmbientBackground />
       {/* Barra lateral colapsável — desktop */}
       <aside
         className={cn(
