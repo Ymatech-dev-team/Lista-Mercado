@@ -9,8 +9,21 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Offline nativo do Next 16 (design.md ADR-1): navegação/RSC/Server Action que falham por rede
+  // ficam pendentes e reenviam ao reconectar; o hook useOffline() alimenta o banner. Experimental.
+  experimental: { useOffline: true },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // O SW nunca pode ficar cacheado, senão o update trava (guia PWA §8).
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+        ],
+      },
+    ];
   },
 };
 
