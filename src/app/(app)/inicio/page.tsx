@@ -5,8 +5,12 @@ import { getActiveList, getCompletedLists, getItemsPurchasedThisMonth, getMonthl
 import { getItemsForList } from "@/db/list-items";
 import { getMostConsumed } from "@/db/products";
 import { getMonthlyBudgetCents } from "@/db/users";
+import { getRepurchaseCandidates } from "@/db/reminders";
+import { pickReminders } from "@/lib/reminders";
 import { MostConsumed } from "@/components/most-consumed";
 import { MonthPanel } from "@/components/month-panel";
+import { RepurchaseReminders } from "./reminders";
+import { InstallInvite } from "./install-invite";
 import { ConcludeButton } from "@/app/(app)/lista/conclude-button";
 import { buttonVariants } from "@/components/ui/button";
 import { ChevronRight } from "@/components/icons";
@@ -53,15 +57,18 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
 
 export default async function InicioPage() {
   const user = await requireUser();
-  const [active, completed, mostConsumed, itensMes, spentCents, lastCents, budgetCents] = await Promise.all([
-    getActiveList(user.id),
-    getCompletedLists(user.id),
-    getMostConsumed(user.id),
-    getItemsPurchasedThisMonth(user.id),
-    getMonthlySpendCents(user.id),
-    getLastCompletedTotalCents(user.id),
-    getMonthlyBudgetCents(user.id),
-  ]);
+  const [active, completed, mostConsumed, itensMes, spentCents, lastCents, budgetCents, reminderCandidates] =
+    await Promise.all([
+      getActiveList(user.id),
+      getCompletedLists(user.id),
+      getMostConsumed(user.id),
+      getItemsPurchasedThisMonth(user.id),
+      getMonthlySpendCents(user.id),
+      getLastCompletedTotalCents(user.id),
+      getMonthlyBudgetCents(user.id),
+      getRepurchaseCandidates(user.id),
+    ]);
+  const reminders = pickReminders(reminderCandidates);
   const items = active ? await getItemsForList(user.id, active.id) : [];
   const done = items.filter((i) => i.isPurchased).length;
   const projectionCents = active ? items.reduce((s, i) => s + (i.unitPriceCents ?? 0) * i.quantity, 0) : null;
@@ -127,6 +134,11 @@ export default async function InicioPage() {
           lastCents={lastCents}
         />
       </section>
+
+      <InstallInvite />
+
+      {/* Hora de repor? */}
+      <RepurchaseReminders reminders={reminders} />
 
       {/* Você sempre compra */}
       {mostConsumed.length > 0 && (

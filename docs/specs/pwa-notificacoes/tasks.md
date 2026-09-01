@@ -15,10 +15,10 @@ Dependency-ordered. Cada escopo fecha e PARA para review. `→` critério (EARS)
 - [x] **3.2** `app/offline/page.tsx` (fallback). Registrador client (layout) + toast "nova versão → recarregar". `next.config` headers `/sw.js` no-store. → RF12.
 
 ## Escopo 4 — Lembretes de recompra
-- [ ] **4.1** `getRepurchaseReminders(userId)` (products.ts): CTE lag()/avg intervalo, ≥2 compras, fuso SP, fator+abandono, exclui lista ativa + soft-deleted, top 5. → RF14-RF19/RF22. `T:` unit da lógica de elegibilidade (extrair função pura de threshold).
-- [ ] **4.2** `RepurchaseReminders` (client) na Home: "+"→quickAddAction (RF20), dismiss/snooze em localStorage (RF21). LogoutButton limpa `mm:reminder-*`. → RF23.
+- [x] **4.1** `getRepurchaseReminders(userId)` (products.ts): CTE lag()/avg intervalo, ≥2 compras, fuso SP, fator+abandono, exclui lista ativa + soft-deleted, top 5. → RF14-RF19/RF22. `T:` unit da lógica de elegibilidade (extrair função pura de threshold).
+- [x] **4.2** `RepurchaseReminders` (client) na Home: "+"→quickAddAction (RF20), dismiss/snooze em localStorage (RF21). LogoutButton limpa `mm:reminder-*`. → RF23.
 
 ## Escopo 5 — Convite de instalação
-- [ ] **5.1** `InstallInvite` (client): beforeinstallprompt (Android), instrução iOS, standalone oculta, dismiss 30d localStorage, sem-suporte oculto. → RF1-RF5.
+- [x] **5.1** `InstallInvite` (client): beforeinstallprompt (Android), instrução iOS, standalone oculta, dismiss 30d localStorage, sem-suporte oculto. → RF1-RF5.
 
 Cobertura: RF1-RF23. Testar offline com `next build && next start`.
