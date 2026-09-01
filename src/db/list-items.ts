@@ -13,6 +13,7 @@ export async function getItemsForList(userId: string, listId: string) {
       productId: listItems.productId,
       name: products.displayName,
       quantity: listItems.quantity,
+      unitPriceCents: listItems.unitPriceCents,
       isPurchased: listItems.isPurchased,
     })
     .from(listItems)
@@ -55,6 +56,17 @@ export async function setItemQuantity(userId: string, itemId: string, quantity: 
   return res.length > 0;
 }
 
+// Define o preço unitário (centavos, ou null = "sem preço"). Coluna única → sem read-modify-write
+// (design.md RNF8). Retorna false se não achou/não é do usuário (anti-IDOR, espelha setItemQuantity).
+export async function setItemPrice(userId: string, itemId: string, priceCents: number | null) {
+  const res = await db
+    .update(listItems)
+    .set({ unitPriceCents: priceCents, updatedAt: new Date() })
+    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .returning({ id: listItems.id });
+  return res.length > 0;
+}
+
 export async function removeItem(userId: string, itemId: string) {
   const [row] = await db
     .delete(listItems)
@@ -68,7 +80,8 @@ export async function restoreItem(
   listId: string,
   productId: string,
   quantity: number,
-  isPurchased: boolean
+  isPurchased: boolean,
+  unitPriceCents: number | null
 ) {
   // Valida posse da LISTA e do PRODUTO (anti-IDOR: ambos os recursos vêm do cliente, design.md §1).
   const ownsList = await db
@@ -87,10 +100,10 @@ export async function restoreItem(
 
   const [row] = await db
     .insert(listItems)
-    .values({ listId, productId, quantity, isPurchased })
+    .values({ listId, productId, quantity, isPurchased, unitPriceCents })
     .onConflictDoUpdate({
       target: [listItems.listId, listItems.productId],
-      set: { quantity, isPurchased, updatedAt: new Date() },
+      set: { quantity, isPurchased, unitPriceCents, updatedAt: new Date() },
     })
     .returning();
   return row;

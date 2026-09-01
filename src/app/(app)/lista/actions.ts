@@ -33,6 +33,7 @@ export type RemovedItem = {
   productId: string;
   quantity: number;
   isPurchased: boolean;
+  unitPriceCents: number | null;
 } | null;
 
 export async function removeItemAction(itemId: string): Promise<RemovedItem> {
@@ -45,23 +46,27 @@ export async function removeItemAction(itemId: string): Promise<RemovedItem> {
     productId: removed.productId,
     quantity: removed.quantity,
     isPurchased: removed.isPurchased,
+    unitPriceCents: removed.unitPriceCents,
   };
 }
 
 // A ação recebe dados do CLIENTE — valida a forma no servidor; restoreItem valida a posse.
+// unitPriceCents: restaura o preço que havia (RF11); payload de restauração é tolerante (não é
+// entrada de preço nova) → default null se ausente/inválido.
 const restoreSchema = z.object({
   listId: z.string(),
   productId: z.string(),
   quantity: z.coerce.number().int().min(1).max(9999).catch(1),
   isPurchased: z.boolean().catch(false),
+  unitPriceCents: z.number().int().min(0).max(9_999_999).nullable().catch(null),
 });
 
 export async function restoreItemAction(data: unknown): Promise<void> {
   const user = await requireUser();
   const parsed = restoreSchema.safeParse(data);
   if (!parsed.success) return;
-  const { listId, productId, quantity, isPurchased } = parsed.data;
-  await restoreItem(user.id, listId, productId, quantity, isPurchased);
+  const { listId, productId, quantity, isPurchased, unitPriceCents } = parsed.data;
+  await restoreItem(user.id, listId, productId, quantity, isPurchased, unitPriceCents);
   revalidatePath("/lista");
 }
 
