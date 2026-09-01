@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Check } from "@/components/icons";
 
 function CartLogo({ size = 18 }: { size?: number }) {
   return (
@@ -12,11 +13,10 @@ function CartLogo({ size = 18 }: { size?: number }) {
   );
 }
 
-const preview: [string, boolean][] = [
-  ["Arroz", true],
-  ["Café", true],
-  ["Banana", false],
-  ["Leite", false],
+const benefits = [
+  "Marque os itens conforme pega no corredor",
+  "Veja na Home o que você mais compra",
+  "Funciona no computador e no celular",
 ];
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -35,31 +35,16 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <h2 className="font-[family-name:var(--font-display)] text-[28px] font-semibold leading-tight text-balance">
             Sua lista de compras, do jeito que você compra.
           </h2>
-
-          <div className="mt-8 max-w-xs rounded-2xl bg-white/10 p-5">
-            <p className="font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-[#a9c4b5]">lista ativa</p>
-            <p className="mt-0.5 font-[family-name:var(--font-display)] text-[17px] font-medium">Compras da semana</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              {preview.map(([nome, done]) => (
-                <li key={nome} className="flex items-center gap-3">
-                  <span
-                    className={
-                      done
-                        ? "flex h-4 w-4 items-center justify-center rounded-[5px] bg-[#33bd78] text-[#0f2a1e]"
-                        : "h-4 w-4 rounded-[5px] border border-white/30"
-                    }
-                  >
-                    {done && (
-                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className={done ? "text-[#a9c4b5]" : ""}>{nome}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="mt-8 space-y-3.5">
+            {benefits.map((b) => (
+              <li key={b} className="flex items-center gap-3 text-sm text-[#cfe0d5]">
+                <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-[7px] bg-[#33bd78]/20 text-[#7fe0aa]">
+                  <Check className="h-3 w-3" />
+                </span>
+                {b}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <p className="text-sm text-[#7fa08d]">Feito pra usar no corredor do mercado.</p>
@@ -73,7 +58,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </span>
           <span className="font-[family-name:var(--font-display)] text-[17px] font-semibold text-ink">Meu Mercado</span>
         </Link>
-        <div className="w-full max-w-sm">{children}</div>
+        {/* sombra sutil no card do formulário (aparece no claro; some no escuro) */}
+        <div className="w-full max-w-sm [&>*]:shadow-[0_12px_32px_-16px_rgba(20,40,30,0.18)]">{children}</div>
       </main>
     </div>
   );

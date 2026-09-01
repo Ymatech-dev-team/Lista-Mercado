@@ -48,6 +48,23 @@ export async function getCompletedLists(userId: string) {
     .orderBy(desc(lists.completedAt));
 }
 
+// Total de itens comprados em listas concluídas NESTE mês (stat da Home).
+export async function getItemsPurchasedThisMonth(userId: string) {
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(listItems)
+    .innerJoin(lists, eq(lists.id, listItems.listId))
+    .where(
+      and(
+        eq(lists.userId, userId),
+        eq(lists.status, "completed"),
+        eq(listItems.isPurchased, true),
+        sql`${lists.completedAt} >= date_trunc('month', now())`
+      )
+    );
+  return row?.n ?? 0;
+}
+
 export async function getCompletedListById(userId: string, listId: string) {
   const [row] = await db
     .select({ id: lists.id, completedAt: lists.completedAt })
