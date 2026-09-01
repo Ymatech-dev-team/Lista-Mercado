@@ -41,9 +41,9 @@ Legenda: `[ ]` a fazer · `[x]` feito · `→` critério de aceite (EARS) · `T:
 - [x] **3.3** `users`: get/set budget + `setBudgetAction` + UI no Perfil. → RF26.
 - [x] **3.4** Home: painel do mês (gasto, comparação, barra de teto 3 estados). → RF27/RF28/RF29/RF30.
 
-## Escopo 4 — LGPD
+## Escopo 4 — LGPD — FEITO (segurança aprovada)
 
-- [ ] **4.1** `/api/export` inclui `unitPriceCents` por item, total por lista e `monthlyBudgetCents`. → RNF7.
+- [x] **4.1** `/api/export` inclui `precoUnitarioCentavos` por item, `totalCentavos` por lista e `tetoMensalCentavos`. → RNF7.
 
 ---
 
