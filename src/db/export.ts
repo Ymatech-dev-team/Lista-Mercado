@@ -30,6 +30,7 @@ export async function exportUserData(userId: string) {
     .select({
       listId: listItems.listId,
       nome: products.displayName,
+      categoria: products.category,
       quantidade: listItems.quantity,
       precoUnitarioCentavos: listItems.unitPriceCents,
       comprado: listItems.isPurchased,

@@ -63,6 +63,11 @@ export const Sun = (p: SVGProps<SVGSVGElement>) => (
 export const Moon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><path d="M20 13.5A8 8 0 1 1 10.5 4a6.2 6.2 0 0 0 9.5 9.5z" /></Icon>
 );
+export const Dots = (p: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...p}>
+    <circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" />
+  </svg>
+);
 export const Spinner = (p: SVGProps<SVGSVGElement>) => (
   <Icon strokeWidth={2.5} {...p}>
     <path d="M12 3a9 9 0 1 0 9 9" opacity={0.9} />

@@ -35,7 +35,7 @@ export function aisleOrder(key: string): number {
 // Dicionário de palpite: token → categoria. Tokens normalizados como o nome do produto e ordenados
 // por comprimento DESC (o mais específico vence: "agua sanitaria" antes de "agua").
 const GUESS: [string, Category][] = [
-  ["banana", "hortifruti"], ["maca", "hortifruti"], ["tomate", "hortifruti"], ["alface", "hortifruti"],
+  ["banana", "hortifruti"], ["maca", "hortifruti"], ["tomate", "hortifruti"], ["alface", "hortifruti"], ["salada", "hortifruti"],
   ["cebola", "hortifruti"], ["batata", "hortifruti"], ["cenoura", "hortifruti"], ["laranja", "hortifruti"],
   ["limao", "hortifruti"], ["mamao", "hortifruti"], ["manga", "hortifruti"], ["uva", "hortifruti"], ["alho", "hortifruti"],
   ["pao", "padaria"], ["bolo", "padaria"], ["biscoito", "padaria"], ["bolacha", "padaria"], ["torrada", "padaria"],
@@ -56,15 +56,46 @@ const GUESS: [string, Category][] = [
   ["desodorante", "higiene"], ["escova", "higiene"],
 ];
 
-const GUESS_SORTED: [string, Category][] = GUESS.map(([t, c]) => [normalizeProductName(t), c] as [string, Category]).sort(
-  (a, b) => b[0].length - a[0].length
-);
+const GUESS_NORM = GUESS.map(([t, c]) => [normalizeProductName(t), c] as [string, Category]);
+// Tokens compostos ("agua sanitaria", "pasta de dente") — mais específicos, por substring, maiores 1º.
+const MULTI_WORD = GUESS_NORM.filter(([t]) => t.includes(" ")).sort((a, b) => b[0].length - a[0].length);
+// Tokens de uma palavra — casados por palavra INTEIRA (não substring); primeiro registro vence.
+const SINGLE_WORD = new Map<string, Category>();
+for (const [t, c] of GUESS_NORM) if (!t.includes(" ") && !SINGLE_WORD.has(t)) SINGLE_WORD.set(t, c);
+
+// Agrupa itens por categoria, ordenando as seções pela ordem de corredor e preservando a ordem
+// dos itens dentro de cada seção (design.md RNF5). Seção vazia é omitida. Categoria fora da união
+// cai em "outros" (defensivo — o CHECK já garante no banco).
+export function groupByCategory<T extends { category: string }>(
+  items: T[]
+): { key: Category; label: string; items: T[] }[] {
+  const buckets = new Map<Category, T[]>();
+  for (const it of items) {
+    const k: Category = isCategory(it.category) ? it.category : "outros";
+    const arr = buckets.get(k);
+    if (arr) arr.push(it);
+    else buckets.set(k, [it]);
+  }
+  return CATEGORIES.filter((c) => buckets.has(c.key)).map((c) => ({
+    key: c.key,
+    label: c.label,
+    items: buckets.get(c.key)!,
+  }));
+}
 
 // Palpite de categoria a partir do nome. Sem match → "outros".
+// (1) tokens compostos por substring; (2) palavra a palavra NA ORDEM do nome — o substantivo
+// costuma liderar ("molho de tomate" → mercearia, não hortifrúti), casando palavra inteira (+ plural
+// simples) para evitar falso-positivo de substring ("sal" dentro de "salada").
 export function guessCategory(rawName: string): Category {
   const n = normalizeProductName(rawName);
-  for (const [token, cat] of GUESS_SORTED) {
-    if (n.includes(token)) return cat;
+  for (const [token, cat] of MULTI_WORD) if (n.includes(token)) return cat;
+  for (const w of n.split(" ")) {
+    const cat =
+      SINGLE_WORD.get(w) ??
+      (w.endsWith("s") ? SINGLE_WORD.get(w.slice(0, -1)) : undefined) ??
+      (w.endsWith("es") ? SINGLE_WORD.get(w.slice(0, -2)) : undefined);
+    if (cat) return cat;
   }
   return "outros";
 }

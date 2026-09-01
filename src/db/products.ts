@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { products, lists, listItems } from "@/db/schema";
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { normalizeProductName, cleanDisplayName } from "@/lib/products/normalize";
+import { guessCategory, isCategory } from "@/lib/categories";
 
 // Acha o produto canônico do usuário por nome normalizado, ou cria. Sempre escopado por userId.
 export async function findOrCreateProduct(userId: string, rawName: string) {
@@ -9,14 +10,26 @@ export async function findOrCreateProduct(userId: string, rawName: string) {
   const normalizedName = normalizeProductName(rawName);
   const [row] = await db
     .insert(products)
-    .values({ userId, displayName, normalizedName })
+    .values({ userId, displayName, normalizedName, category: guessCategory(rawName) })
     .onConflictDoUpdate({
       target: [products.userId, products.normalizedName],
       targetWhere: isNull(products.deletedAt),
-      set: { updatedAt: new Date() },
+      set: { updatedAt: new Date() }, // NÃO toca category: preserva override do usuário (design.md ADR)
     })
     .returning();
   return row;
+}
+
+// Define a categoria de um produto (edição do palpite). Escopado por products.user_id (anti-IDOR,
+// design.md ADR-4); SEM gate de lista ativa (categoria pode tocar histórico). false se não é dono.
+export async function setProductCategory(userId: string, productId: string, category: string) {
+  if (!isCategory(category)) return false;
+  const res = await db
+    .update(products)
+    .set({ category, updatedAt: new Date() })
+    .where(and(eq(products.id, productId), eq(products.userId, userId), isNull(products.deletedAt)))
+    .returning({ id: products.id });
+  return res.length > 0;
 }
 
 // Produto do usuário por id (valida posse — anti-IDOR).

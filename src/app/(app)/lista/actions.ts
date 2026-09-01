@@ -6,8 +6,9 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
 import { getOrCreateActiveList, getActiveList, completeActiveList, getCompletedLists } from "@/db/lists";
-import { findOrCreateProduct, getUserProduct, getRememberedPrices } from "@/db/products";
+import { findOrCreateProduct, getUserProduct, getRememberedPrices, setProductCategory } from "@/db/products";
 import { addItem, removeItem, restoreItem, getItemsForList, setItemPrice } from "@/db/list-items";
+import { isCategory } from "@/lib/categories";
 
 export type AddItemState = { error?: string; ok?: boolean };
 
@@ -92,6 +93,19 @@ export async function quickAddAction(productId: string): Promise<{ ok?: boolean;
 
   revalidatePath("/lista");
   revalidatePath("/inicio");
+  return { ok: true };
+}
+
+// Troca a categoria de um produto (edição do palpite). Persiste no produto → vale pras próximas listas.
+// Server-driven (revalidate regruça a lista); escopado por dono; valida a categoria (design.md RF3).
+export async function setCategoryAction(productId: string, category: string): Promise<{ ok?: boolean; error?: string }> {
+  const user = await requireUser();
+  if (!isCategory(category)) return { error: "Categoria inválida." };
+  const ok = await setProductCategory(user.id, productId, category);
+  if (!ok) return { error: "Produto não encontrado." };
+  revalidatePath("/lista");
+  revalidatePath("/inicio");
+  revalidatePath("/historico");
   return { ok: true };
 }
 

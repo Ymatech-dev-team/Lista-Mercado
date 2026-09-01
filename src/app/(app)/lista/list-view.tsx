@@ -6,13 +6,15 @@ import { ListItem } from "@/components/ui/list-item";
 import { Progress } from "@/components/ui/progress";
 import { formatBRL } from "@/lib/money";
 import { normalizePendingQueue, type Pending, type PendingQueue } from "@/lib/pending-queue";
+import { groupByCategory, categoryLabel, type Category } from "@/lib/categories";
 import { ConcludeButton } from "./conclude-button";
-import { removeItemAction, restoreItemAction } from "./actions";
+import { removeItemAction, restoreItemAction, setCategoryAction } from "./actions";
 
 export type Item = {
   id: string;
   productId: string;
   name: string;
+  category: string;
   quantity: number;
   unitPriceCents: number | null;
   isPurchased: boolean;
@@ -225,6 +227,21 @@ export function ListView({
     );
   }
 
+  // Categoria é do PRODUTO. Otimista (o item salta de seção na hora, coerente com o remover); o
+  // revalidate confirma depois. Reverte no erro. groupByCategory é puro no cliente.
+  async function changeCategory(item: Item, category: Category) {
+    if (item.category === category) return;
+    const prev = item.category;
+    setItems((p) => p.map((i) => (i.id === item.id ? { ...i, category } : i)));
+    const res = await setCategoryAction(item.productId, category);
+    if (res?.error) {
+      setItems((p) => p.map((i) => (i.id === item.id ? { ...i, category: prev } : i)));
+      toast(res.error);
+    } else {
+      toast(`Movido para ${categoryLabel(category)}`);
+    }
+  }
+
   async function remove(item: Item) {
     setItems((prev) => prev.filter((i) => i.id !== item.id)); // otimista
     const removed = await removeItemAction(item.id);
@@ -261,23 +278,35 @@ export function ListView({
         </span>
       </div>
       <Progress value={(done / items.length) * 100} className="mb-3" />
-      <ul>
-        {items.map((it) => (
-          <li key={it.id}>
-            <ListItem
-              name={it.name}
-              quantity={it.quantity}
-              unitPriceCents={it.unitPriceCents}
-              rememberedCents={remembered[it.productId] ?? null}
-              checked={it.isPurchased}
-              onToggle={() => toggle(it)}
-              onRemove={() => remove(it)}
-              onQuantityChange={(q) => changeQty(it, q)}
-              onPriceChange={(c) => changePrice(it, c)}
-            />
-          </li>
-        ))}
-      </ul>
+      {groupByCategory(items).map((group) => (
+        <section key={group.key} aria-labelledby={`sec-${group.key}`} className="mb-1">
+          <h2
+            id={`sec-${group.key}`}
+            className="mb-1 mt-4 border-t border-hairline pt-3 font-[family-name:var(--font-num)] text-[11px] font-normal uppercase tracking-[0.1em] text-muted"
+          >
+            {group.label}
+          </h2>
+          <ul>
+            {group.items.map((it) => (
+              <li key={it.id}>
+                <ListItem
+                  name={it.name}
+                  quantity={it.quantity}
+                  unitPriceCents={it.unitPriceCents}
+                  rememberedCents={remembered[it.productId] ?? null}
+                  category={it.category}
+                  checked={it.isPurchased}
+                  onToggle={() => toggle(it)}
+                  onRemove={() => remove(it)}
+                  onQuantityChange={(q) => changeQty(it, q)}
+                  onPriceChange={(c) => changePrice(it, c)}
+                  onCategoryChange={(c) => changeCategory(it, c)}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       <div className="mt-4 flex items-baseline justify-between border-t border-hairline pt-3">
         <span className="text-[11px] uppercase tracking-[0.09em] text-muted">

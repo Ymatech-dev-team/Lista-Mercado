@@ -6,6 +6,7 @@ import { getCompletedListById } from "@/db/lists";
 import { getItemsForList } from "@/db/list-items";
 import { formatDatePt } from "@/lib/date";
 import { formatBRL } from "@/lib/money";
+import { groupByCategory } from "@/lib/categories";
 import { Check } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -37,9 +38,17 @@ export default async function HistoricoDetailPage({ params }: { params: Promise<
         <span className="font-[family-name:var(--font-num)] tabular-nums">{items.length}</span> itens comprados · somente leitura
       </p>
 
-      <ul>
-        {items.map((it) => (
-          <li key={it.id} className="flex items-center gap-3 border-b border-hairline py-3 last:border-b-0">
+      {groupByCategory(items).map((group) => (
+        <section key={group.key} aria-labelledby={`hist-${group.key}`} className="mb-1">
+          <h2
+            id={`hist-${group.key}`}
+            className="mb-1 mt-4 border-t border-hairline pt-3 font-[family-name:var(--font-num)] text-[11px] font-normal uppercase tracking-[0.1em] text-muted"
+          >
+            {group.label}
+          </h2>
+          <ul>
+            {group.items.map((it) => (
+              <li key={it.id} className="flex items-center gap-3 border-b border-hairline py-3 last:border-b-0">
             <span
               className={cn(
                 "flex h-5 w-5 flex-none items-center justify-center rounded-md border",
@@ -55,9 +64,11 @@ export default async function HistoricoDetailPage({ params }: { params: Promise<
             <span className="min-w-[64px] text-right font-[family-name:var(--font-num)] tabular-nums text-sm text-num">
               {it.unitPriceCents != null ? formatBRL(it.unitPriceCents * it.quantity) : "—"}
             </span>
-          </li>
-        ))}
-      </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       <div className="mt-4 flex items-baseline justify-between border-t border-hairline pt-3">
         <span className="text-[11px] uppercase tracking-[0.09em] text-muted">

@@ -18,6 +18,7 @@ export async function getItemsForList(userId: string, listId: string) {
       id: listItems.id,
       productId: listItems.productId,
       name: products.displayName,
+      category: products.category,
       quantity: listItems.quantity,
       unitPriceCents: listItems.unitPriceCents,
       isPurchased: listItems.isPurchased,

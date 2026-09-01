@@ -1,18 +1,22 @@
 import { cn } from "@/lib/utils";
-import { Check, Trash, Plus, Minus } from "@/components/icons";
+import { Check, Trash, Plus, Minus, Dots } from "@/components/icons";
 import { formatBRL } from "@/lib/money";
+import type { Category } from "@/lib/categories";
 import { PriceField } from "@/app/(app)/lista/price-field";
+import { ItemActionsDialog } from "@/app/(app)/lista/item-actions-dialog";
 
 type ListItemProps = {
   name: string;
   quantity?: number;
   unitPriceCents?: number | null;
   rememberedCents?: number | null;
+  category?: string;
   checked?: boolean;
   onToggle?: () => void;
   onRemove?: () => void;
   onQuantityChange?: (q: number) => void;
   onPriceChange?: (cents: number | null) => void;
+  onCategoryChange?: (c: Category) => void;
   className?: string;
 };
 
@@ -24,11 +28,13 @@ export function ListItem({
   quantity,
   unitPriceCents,
   rememberedCents,
+  category,
   checked = false,
   onToggle,
   onRemove,
   onQuantityChange,
   onPriceChange,
+  onCategoryChange,
   className,
 }: ListItemProps) {
   const qty = quantity ?? 1;
@@ -57,6 +63,27 @@ export function ListItem({
     </button>
   );
 
+  // Menu "⋯" (opção C): trocar corredor + remover. Só na lista editável; senão cai na lixeira simples.
+  const MoreControl = onCategoryChange ? (
+    <ItemActionsDialog
+      itemName={name}
+      current={category ?? "outros"}
+      onCategoryChange={onCategoryChange}
+      onRemove={onRemove ?? (() => {})}
+      trigger={
+        <button
+          type="button"
+          aria-label={`Ações de ${name}`}
+          className="flex h-11 w-11 flex-none items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-sunken hover:text-ink active:scale-[0.98]"
+        >
+          <Dots className="h-4 w-4" />
+        </button>
+      }
+    />
+  ) : (
+    RemoveBtn
+  );
+
   // ----- Opção B: linha do item editável (com preço) -----
   if (onQuantityChange) {
     return (
@@ -79,7 +106,7 @@ export function ListItem({
           >
             {subtotal}
           </span>
-          {RemoveBtn}
+          {MoreControl}
         </div>
 
         <div className="flex flex-wrap items-center gap-2 pl-9 pt-0.5">
