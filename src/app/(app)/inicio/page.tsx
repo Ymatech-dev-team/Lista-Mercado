@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/require-user";
-import { getActiveList, getCompletedLists, getItemsPurchasedThisMonth } from "@/db/lists";
+import { getActiveList, getCompletedLists, getItemsPurchasedThisMonth, getMonthlySpendCents, getLastCompletedTotalCents } from "@/db/lists";
 import { getItemsForList } from "@/db/list-items";
 import { getMostConsumed } from "@/db/products";
+import { getMonthlyBudgetCents } from "@/db/users";
 import { MostConsumed } from "@/components/most-consumed";
+import { MonthPanel } from "@/components/month-panel";
 import { ConcludeButton } from "@/app/(app)/lista/conclude-button";
 import { buttonVariants } from "@/components/ui/button";
 import { ChevronRight } from "@/components/icons";
@@ -51,14 +53,19 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
 
 export default async function InicioPage() {
   const user = await requireUser();
-  const [active, completed, mostConsumed, itensMes] = await Promise.all([
+  const [active, completed, mostConsumed, itensMes, spentCents, lastCents, budgetCents] = await Promise.all([
     getActiveList(user.id),
     getCompletedLists(user.id),
     getMostConsumed(user.id),
     getItemsPurchasedThisMonth(user.id),
+    getMonthlySpendCents(user.id),
+    getLastCompletedTotalCents(user.id),
+    getMonthlyBudgetCents(user.id),
   ]);
   const items = active ? await getItemsForList(user.id, active.id) : [];
   const done = items.filter((i) => i.isPurchased).length;
+  const projectionCents = active ? items.reduce((s, i) => s + (i.unitPriceCents ?? 0) * i.quantity, 0) : null;
+  const projectionMissing = items.filter((i) => i.unitPriceCents == null).length;
   const recent = completed.slice(0, 3);
   const favorite = mostConsumed[0]?.name ?? "—";
 
@@ -107,6 +114,19 @@ export default async function InicioPage() {
           <div className="mt-0.5 text-[13px] text-muted">mais comprado</div>
         </div>
       </div>
+
+      {/* Resumo do mês */}
+      <section className="mt-9">
+        <Label>este mês</Label>
+        <MonthPanel
+          spentCents={spentCents}
+          budgetCents={budgetCents}
+          projectionCents={projectionCents}
+          projectionMissing={projectionMissing}
+          projectionTotal={items.length}
+          lastCents={lastCents}
+        />
+      </section>
 
       {/* Você sempre compra */}
       {mostConsumed.length > 0 && (

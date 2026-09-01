@@ -34,12 +34,12 @@ Legenda: `[ ]` a fazer · `[x]` feito · `→` critério de aceite (EARS) · `T:
 - [x] **2.5 (review):** trava de imutabilidade no servidor — `ownedActiveByUser` nas escritas (preço/qtd/comprado) + restore só em lista ativa. → RF14/RF15.
 - [x] **2.6 (review):** mobile ≤320px — `flex-wrap` na 2ª linha.
 
-## Escopo 3 — Gasto do mês + comparação + teto
+## Escopo 3 — Gasto do mês + comparação + teto — FEITO (review aplicado)
 
-- [ ] **3.1** `getMonthlySpendCents(userId)` + **corrigir fuso** em `getItemsPurchasedThisMonth` (`AT TIME ZONE 'America/Sao_Paulo'`). → RF18/RF19/D4/ADR-4/RNF5. `T:` compra 30/22h BRT cai em setembro, não outubro.
-- [ ] **3.2** `getListTotalCents` + `getPriceCoverage` + `getLastCompletedTotalCents`. → RF20/RF21/RF22/RF23.
-- [ ] **3.3** `users`: get/set budget + `setBudgetAction` + UI no Perfil. → RF26.
-- [ ] **3.4** Home: painel do mês (gasto, comparação, barra de teto 3 estados). → RF27/RF28/RF29/RF30.
+- [x] **3.1** `getMonthlySpendCents(userId)` + **corrigir fuso** em `getItemsPurchasedThisMonth` (`AT TIME ZONE 'America/Sao_Paulo'`). → RF18/RF19/D4/ADR-4/RNF5. `T:` compra 30/22h BRT cai em setembro, não outubro.
+- [x] **3.2** `getListTotalCents` + `getPriceCoverage` + `getLastCompletedTotalCents`. → RF20/RF21/RF22/RF23.
+- [x] **3.3** `users`: get/set budget + `setBudgetAction` + UI no Perfil. → RF26.
+- [x] **3.4** Home: painel do mês (gasto, comparação, barra de teto 3 estados). → RF27/RF28/RF29/RF30.
 
 ## Escopo 4 — LGPD
 

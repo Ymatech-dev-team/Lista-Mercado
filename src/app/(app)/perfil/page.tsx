@@ -5,13 +5,16 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { getMonthlyBudgetCents } from "@/db/users";
 import { DeleteAccount } from "./delete-account";
+import { BudgetSetting } from "./budget";
 
 export const runtime = "nodejs";
 export const metadata: Metadata = { title: "Perfil — Meu Mercado" };
 
 export default async function PerfilPage() {
   const user = await requireUser();
+  const budgetCents = await getMonthlyBudgetCents(user.id);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 md:px-10 md:py-10">
@@ -21,6 +24,11 @@ export default async function PerfilPage() {
         <p className="font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-muted">e-mail</p>
         <p className="mt-1 text-ink">{user.email}</p>
       </Card>
+
+      <p className="mb-2 font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-muted">orçamento</p>
+      <div className="mb-8">
+        <BudgetSetting initialCents={budgetCents} />
+      </div>
 
       <p className="mb-2 font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.09em] text-muted">aparência</p>
       <div className="mb-8 flex flex-col gap-3">
