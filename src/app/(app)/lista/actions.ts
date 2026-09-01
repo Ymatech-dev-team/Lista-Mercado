@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { addItemSchema } from "@/lib/validation/list";
-import { getOrCreateActiveList, getActiveList, completeActiveList } from "@/db/lists";
+import { getOrCreateActiveList, getActiveList, completeActiveList, getCompletedLists } from "@/db/lists";
 import { findOrCreateProduct, getUserProduct } from "@/db/products";
 import { addItem, removeItem, restoreItem, getItemsForList } from "@/db/list-items";
 
@@ -77,6 +77,38 @@ export async function quickAddAction(productId: string): Promise<{ ok?: boolean;
   revalidatePath("/lista");
   revalidatePath("/inicio");
   return { ok: true };
+}
+
+// Adiciona uma sugestão (por nome) à lista ativa — reusa o produto canônico.
+export async function addSuggestionAction(name: string): Promise<{ ok?: boolean; error?: string }> {
+  const user = await requireUser();
+  const clean = String(name ?? "").trim().slice(0, 80);
+  if (!clean) return { error: "Nome inválido." };
+  const list = await getOrCreateActiveList(user.id);
+  const product = await findOrCreateProduct(user.id, clean);
+  await addItem(list.id, product.id, 1);
+  revalidatePath("/lista");
+  revalidatePath("/inicio");
+  return { ok: true };
+}
+
+// Repetir última compra: recria os itens da última lista concluída na lista ativa.
+export async function repeatLastAction(): Promise<{ error?: string } | void> {
+  const user = await requireUser();
+  const completed = await getCompletedLists(user.id);
+  const last = completed[0];
+  if (!last) return { error: "Você ainda não tem uma compra anterior." };
+
+  const lastItems = await getItemsForList(user.id, last.id);
+  if (lastItems.length === 0) return { error: "A última compra está vazia." };
+
+  const active = await getOrCreateActiveList(user.id);
+  for (const it of lastItems) {
+    await addItem(active.id, it.productId, it.quantity);
+  }
+  revalidatePath("/lista");
+  revalidatePath("/inicio");
+  redirect("/lista");
 }
 
 // Conclui a compra: lista vira histórico imutável (design.md RF5).

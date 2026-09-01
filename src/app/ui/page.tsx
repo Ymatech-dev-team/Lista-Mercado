@@ -30,12 +30,12 @@ function Label({ children }: { children: string }) {
   return <p className="mb-4 font-[family-name:var(--font-num)] text-[11px] uppercase tracking-[0.08em] text-muted">{children}</p>;
 }
 
-type Item = { id: number; name: string; qtd: string; checked: boolean };
+type Item = { id: number; name: string; qtd: number; checked: boolean };
 const initialItems: Item[] = [
-  { id: 1, name: "Arroz", qtd: "5 kg", checked: true },
-  { id: 2, name: "Café", qtd: "2", checked: true },
-  { id: 3, name: "Banana", qtd: "1 dz", checked: false },
-  { id: 4, name: "Leite", qtd: "6", checked: false },
+  { id: 1, name: "Arroz", qtd: 5, checked: true },
+  { id: 2, name: "Café", qtd: 2, checked: true },
+  { id: 3, name: "Banana", qtd: 1, checked: false },
+  { id: 4, name: "Leite", qtd: 6, checked: false },
 ];
 
 export default function UiPage() {

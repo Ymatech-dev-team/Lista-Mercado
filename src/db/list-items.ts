@@ -44,6 +44,17 @@ export async function setItemPurchased(userId: string, itemId: string, purchased
   return res.length > 0;
 }
 
+// Define a quantidade (absoluto, mínimo 1). Retorna false se não achou/não é do usuário.
+export async function setItemQuantity(userId: string, itemId: string, quantity: number) {
+  const q = Math.max(1, Math.floor(quantity));
+  const res = await db
+    .update(listItems)
+    .set({ quantity: q, updatedAt: new Date() })
+    .where(and(eq(listItems.id, itemId), ownedByUser(userId)))
+    .returning({ id: listItems.id });
+  return res.length > 0;
+}
+
 export async function removeItem(userId: string, itemId: string) {
   const [row] = await db
     .delete(listItems)

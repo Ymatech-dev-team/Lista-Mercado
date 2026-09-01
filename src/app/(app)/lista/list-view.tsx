@@ -144,6 +144,33 @@ export function ListView({ listId, initialItems }: { listId: string; initialItem
     }
   }
 
+  async function putQuantity(itemId: string, quantity: number): Promise<Response> {
+    const ctrl = new AbortController();
+    const t = window.setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+    try {
+      return await fetch(`/api/items/${itemId}/quantity`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ quantity }),
+        signal: ctrl.signal,
+      });
+    } finally {
+      window.clearTimeout(t);
+    }
+  }
+
+  async function changeQty(item: Item, quantity: number) {
+    const prev = item.quantity;
+    setItems((p) => p.map((i) => (i.id === item.id ? { ...i, quantity } : i))); // otimista
+    try {
+      const res = await putQuantity(item.id, quantity);
+      if (!res.ok) throw new Error();
+    } catch {
+      setItems((p) => p.map((i) => (i.id === item.id ? { ...i, quantity: prev } : i))); // reverte
+      toast("Não foi possível atualizar a quantidade.");
+    }
+  }
+
   async function remove(item: Item) {
     setItems((prev) => prev.filter((i) => i.id !== item.id)); // otimista
     const removed = await removeItemAction(item.id);
@@ -183,10 +210,11 @@ export function ListView({ listId, initialItems }: { listId: string; initialItem
           <li key={it.id}>
             <ListItem
               name={it.name}
-              quantity={it.quantity > 1 ? String(it.quantity) : undefined}
+              quantity={it.quantity}
               checked={it.isPurchased}
               onToggle={() => toggle(it)}
               onRemove={() => remove(it)}
+              onQuantityChange={(q) => changeQty(it, q)}
             />
           </li>
         ))}
